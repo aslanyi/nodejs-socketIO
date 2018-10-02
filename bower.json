@@ -1,0 +1,14 @@
+{
+  "name": "nodejs-socketio",
+  "description": "",
+  "main": "",
+  "authors": [
+    "Taha TEPEDELEN <mustafatahatepedelen@hotmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/aslanyi/nodejs-socketIO",
+  "dependencies": {
+    "angular": "^1.7.4",
+    "semantic": "^2.4.0"
+  }
+}
