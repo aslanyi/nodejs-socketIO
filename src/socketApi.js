@@ -2,12 +2,11 @@ const socketio = require('socket.io');
 const io = socketio();
 
 const socketApi = { };
-const users = [ ];
+const users ={ };
 socketApi.io = io;
 
 io.on('connection',(socket)=>{
     console.log('user connected');
-
     socket.on('newUser',(data)=>{
        const defaultData={
         id : socket.id,
@@ -17,8 +16,12 @@ io.on('connection',(socket)=>{
         }
        };
        const userData = Object.assign(data,defaultData);
-       users.push(userData);
-       console.log(users);
+       users[socket.id]=(userData);
+       socket.broadcast.emit('newUser', users[socket.id]);
+    });
+    socket.on('disconnect',()=>{
+        socket.broadcast.emit('userDisconnected',users[socket.id]);
+        delete users[socket.id];
     });
 });
 
