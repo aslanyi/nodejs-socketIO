@@ -4,29 +4,33 @@ block content
   div(ng-controller="indexController",ng-init="init()")
     .ui.one.column.stackable.center.aligned.page.grid.margin-30
     .column.twelve.wide
-      .ui.stacked.segment.gameArea
-        .circle.blue(style='left:150px; top:100px')
+      .ui.stacked.segment.gameArea(ng-click="onClickPlayer($event)")
+        .circle(
+        ng-repeat="players in player",
+        ng-style="{'left':players.position.x+'px', 'top':players.position.y+'px'}",
+        id="{{players.id}}",
+        class="{{players.color}}")
           .relative
-            span.name Mehmet
-            .message Selam
-        .circle.green(style='left:300px; top:100px')
-          .relative
-            span.name Alp
-            .message selam nasılsın :)
-        .circle.red(style='left:350px; top:300px')
-          .relative
-            span.name Joe
-            .message this is awesome
+            span.name {{players.userName}}
+            .message 
+        
       .ui.items.chat
-        .item(ng-repeat='messages in messages')
-          .content(ng-if="!messages.type.code")
-            spane [SERVER]
-            a.header.name  {{messages.username}} &nbsp;
-            .description.message(ng-if="messages.type.message")
+        .item(ng-repeat='message in messages')
+          .content(ng-if="!message.type.code")
+            span [SERVER]
+            a.header.name  {{message.username}} &nbsp;
+            .description.message(ng-if="message.type.message")
               | katıldı
-            .description.message(ng-if="!messages.type.message")
+            .description.message(ng-if="!message.type.message")
               | ayrıldı
-      .ui.action.input.fluid
-        input(type='text', placeholder='Type here...')
-        button.ui.button Send
+
+          .content(ng-if="message.type.code")
+            span
+            a.header.name  {{message.username}} &nbsp;
+            .description.message
+              | {{message.text}}
+            
+      form.ui.action.input.fluid(ng-submit="sendMessages()")
+        input(ng-model='msg',placeholder='Type here...')
+        button.ui.button(type="submit") Send
 
