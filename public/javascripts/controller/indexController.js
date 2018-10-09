@@ -11,14 +11,29 @@ app.controller('indexController',['$scope','indexFactory',($scope,indexFactory)=
             return false;
         }
     };
+    function scrollTop() {
+        setTimeout(()=>{
+            const chatElement = document.getElementById('chat-area');
+            chatElement.scrollTop = chatElement.scrollHeight;
+            });
+      }
+      
+    function bubble(id,data){
+        $('#'+id).find('.message').show().html(data);
+        setTimeout(()=>{
+            $('#'+id).find('.message').hide('slow');
+        },2000)
+    };
 
-    function initSocket(userName) {
+   async function initSocket(userName) {
         const connectOptions = {
             reconnectAttempts :3 ,
             reconnectionDelay :600
         };
         const url  = 'http://localhost:3000';
-        indexFactory.connectSocket(url,connectOptions).then((socket)=>{
+        try {
+            
+            const socket = await indexFactory.connectSocket(url,connectOptions);
             socket.on('initPlayers',(players)=>{
                 $scope.player = players;
                 $scope.$apply();
@@ -35,6 +50,7 @@ app.controller('indexController',['$scope','indexFactory',($scope,indexFactory)=
                 };
                 $scope.messages.push(messageData);
                 $scope.player[data.id]=data;
+                scrollTop();
                 $scope.$apply();
                 
             });
@@ -48,12 +64,19 @@ app.controller('indexController',['$scope','indexFactory',($scope,indexFactory)=
                     username:data.userName
                 };
                 $scope.messages.push(messageData);
+                scrollTop();
                 $scope.$apply();
             });
             socket.on('animate',(data)=>{
                 $('#'+data.socketId).animate({'left':data.x ,'top':data.y},()=>{
                     animate=false;
                 });
+            });
+            socket.on('newMessage',(data) =>{
+                $scope.messages.push(data);
+                $scope.$apply();
+                bubble(data.socketId,data.text);
+                
             });
             let animate = false;
             $scope.onClickPlayer =($event)=>{
@@ -71,7 +94,7 @@ app.controller('indexController',['$scope','indexFactory',($scope,indexFactory)=
                 
             };
             $scope.sendMessages = ()=>{
-                let message = $scope.msg;
+                let message = $scope.message;
                 const messageData = {
                     type:{
                         code:1
@@ -79,14 +102,18 @@ app.controller('indexController',['$scope','indexFactory',($scope,indexFactory)=
                     username:userName,
                     text : message
                 };
+                socket.emit('newMessage',messageData);
                 $scope.messages.push(messageData);
-                $scope.msg=' ';
-                $scope.$apply();
+                $scope.message=' ';
+                bubble(socket.id,message);
+                scrollTop();
                 
-            };
-        }).catch((err)=>{
-            console.log(err);
-        });    
+            }; 
+        } catch (error) {
+          console.log(error);      
+        }
+       
+            
     }
     
 }]);
